@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-key")  
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["elearn-final.fly.dev"]
 
 
 # Application definition

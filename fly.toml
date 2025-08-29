@@ -13,6 +13,7 @@ console_command = '/code/manage.py shell'
   release_command = 'python manage.py migrate --noinput'
 
 [env]
+  DJANGO_SETTINGS_MODULE = "elearnApp.settings"
   PORT = '8000'
 
 [http_service]
