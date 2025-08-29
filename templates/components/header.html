@@ -1,0 +1,43 @@
+<!-- templates/partials/header.html -->
+<nav>
+    <a href="{% url 'home' %}">Home</a>
+    {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Log out</button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}">Login</a>
+    {% endif %}
+</nav>
+<div>
+    {% if user.is_authenticated %}
+        {% if user.role == "student" %}
+            <p>Welcome, Student! </p>
+        {% elif user.role == "teacher" %}
+            <p>Welcome, Teacher! </p>
+        {% endif %}
+    {% endif %}
+</div>
+{% if user.is_authenticated %}
+    <div>
+        <h4 style="cursor: pointer;" id="toggle-notifications">
+            Notifications 
+        </h4>
+        <ul id="notifications-list" style="display: none; list-style: none; padding-left: 0;">
+            {% for note in user.notifications.all|dictsortreversed:"created_at"|slice:":5" %}
+                <li {% if not note.is_read %}style="font-weight: bold;"{% else %}style="color: grey;"{% endif %}>
+                    {% if note.course %}
+                        <a href="{% url 'course_detail' note.course.id %}"><strong>{{ note.course.title }}</strong></a>
+                    {% endif %}
+                    {{ note.message }} ({{ note.created_at|date:"M d, Y H:i" }})
+                    {% if not note.is_read %}
+                        <a href="{% url 'mark_notification_read' note.id %}">Mark as read</a>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li>No notifications</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

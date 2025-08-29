@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Welcome, {{ user.real_name }}!</h1>
+
+<!--Teacher Updates-->
+{% if user.role == 'teacher' %}
+  <h3>Send Notification to Students</h3>
+  <form method="post">
+      {% csrf_token %}
+      {{ notification_form.as_p }}
+      <button type="submit" name="notification_submit">Send Notification</button>
+  </form>
+{% endif %}
+
+<!--Status Update-->
+<h3>Post a Status Update</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ status_form.as_p }}
+    <button type="submit" name="status_submit">Post</button>
+</form>
+
+<!--Status Updates List-->
+<h3>Status Updates</h3>
+{% if updates %}
+    <ul>
+        {% for update in updates %}
+            <li>
+                <strong>{{ update.created_at|date:"M d, Y H:i" }}</strong>  
+                <a href="{% url 'profile' update.user.username %}">{{ update.user.username }}</a>:  
+                {{ update.content }}
+                
+                {% if user.role == 'teacher' %}
+                    <form action="{% url 'delete_update' update.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="color:red; background:none; border:none; cursor:pointer;"> Delete </button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No status updates yet.</p>
+{% endif %}
+
+<!--Enrolled Courses-->
+{% if user.role == 'student' %}
+  <h2>Your Courses</h2>
+  {% for course in user.enrolled_courses.all %}
+    <li><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></li>
+  {% empty %}
+    <p>You are not enrolled in any courses yet.</p>
+  {% endfor %}
+
+  <a href="{% url 'browse_courses' %}">Browse Courses</a>
+
+  <!--Taught Courses-->
+{% elif user.role == 'teacher' %}
+  <h2>Courses You Teach</h2>
+  {% for course in user.teacher_courses.all %}
+    <li><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></li>
+  {% empty %}
+    <p>You have not created any courses yet.</p>
+  {% endfor %}
+
+<!--Search functions-->
+  <div style="margin-top: 20px;">
+      <a href="{% url 'user_search' %}" class="btn btn-primary"> Search Students/Teachers </a>
+  </div>
+  <a href="{% url 'browse_courses' %}">Course List</a>
+  <a href="{% url 'create_course' %}" class="btn btn-primary">Create a New Course</a>
+{% endif %}
+
+{% endblock %}

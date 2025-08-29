@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Search Users</h2>
+
+<form method="get" action="{% url 'user_search' %}">
+    <input type="text" name="q" placeholder="Search by username or real name" value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
+{% if results %}
+    <h3>Results:</h3>
+    <ul>
+    {% for user in results %}
+        <li>
+            <a href="{% url 'profile' user.username %}">{{ user.real_name }} ({{ user.username }})</a>
+            - {{ user.role|capfirst }}
+        </li>
+    {% endfor %}
+    </ul>
+{% elif query %}
+    <p>No users found matching "{{ query }}"</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html'%}
+
+{% block content%}
+<h2>{{ user_type }} Signup</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign up</button>
+</form>
+<a href="{% url 'login' %}">Already have an account? Login</a>
+{% endblock %}

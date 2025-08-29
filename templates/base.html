@@ -1,0 +1,26 @@
+{% include "components/title.html" %}
+{% include "components/header.html" %}
+
+<body>
+<div class="content">
+    {% block content %} Did not render content {% endblock%}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const toggle = document.getElementById("toggle-notifications");
+    const list = document.getElementById("notifications-list");
+
+    toggle.addEventListener("click", function() {
+        if (list.style.display === "none") {
+            list.style.display = "block";
+            toggle.innerHTML = "Notifications ▲";  // change icon
+        } else {
+            list.style.display = "none";
+            toggle.innerHTML = "Notifications ▼";  // change back
+        }
+    });
+});
+</script>
+
+{% include "components/footer.html" %}

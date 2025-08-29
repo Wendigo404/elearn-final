@@ -1,0 +1,35 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<h2>Available Courses</h2>
+{% if user.role == 'teacher' %}
+    <a href="{% url 'create_course' %}" class="btn btn-primary">+</a>
+{% endif %}
+<ul>
+    {% for course in courses %}
+    <li>
+        <a href="{% url 'course_detail' course.id %}">{{ course.title }}</a> - {{ course.description }}
+
+        <!--If a student isn't already enrolled, they can enroll-->
+        {% if user.role == 'student' %}
+            {% if user in course.students.all %}
+                <button disabled>Enrolled</button>
+            {% else %}
+                <form action="{% url 'enroll_course' course.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Enroll</button>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        <!--Teachers can delete a course if they are the lecturer for that course-->
+        {% if user.role == 'teacher' and course.teacher == user %}
+            <form action="{% url 'delete_course' course.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Delete</button>
+            </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

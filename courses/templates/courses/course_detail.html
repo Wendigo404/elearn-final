@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ course.title }}</h2>
+<p>{{ course.description }}</p>
+
+<hr>
+
+<!--Course Lecturer-->
+<h3>Lecturer</h3>
+<p>
+    <a href="{% url 'profile' course.teacher.username %}">
+        {{ course.teacher.real_name }} ({{ course.teacher.username }})
+    </a>
+</p>
+
+<hr>
+
+<!--Students enrolled in course-->
+<h3>Enrolled Students</h3>
+{% if course.students.all %}
+    <ul>
+        {% for student in course.students.all %}
+            <li>
+                <a href="{% url 'profile' student.username %}">
+                    {{ student.real_name }} ({{ student.username }})
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No students enrolled yet.</p>
+{% endif %}
+
+<hr>
+
+<!--Material uploaded for course-->
+<h3>Course Materials</h3>
+{% if course.materials.all %}
+    <ul>
+    {% for material in course.materials.all %}
+        <li>
+            <a href="{{ material.file.url }}">{{ material.description|default:material.file.name }}</a>
+            (uploaded {{ material.uploaded_at|date:"M d, Y H:i" }})
+            <a href="{% url 'download_material' material.id %}">Download</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No materials uploaded yet.</p>
+{% endif %}
+
+{% if user.is_authenticated and user.role == 'teacher' and course.teacher == user %}
+    <a href="{% url 'upload_material' course.id %}">Upload New Material</a>
+{% endif %}
+
+<hr>
+
+<!--Student feedback for course-->
+<h3>Feedback</h3>
+<ul>
+{% for fb in feedbacks %}
+    <li>
+        <strong>
+            <a href="{% url 'profile' fb.student.username %}">{{ fb.student.username }}</a>
+        </strong> 
+        ({{ fb.created_at|date:"M d, Y H:i" }}): {{ fb.content }}
+    </li>
+{% empty %}
+    <p>No feedback yet.</p>
+{% endfor %}
+</ul>
+
+{% if user.is_authenticated and user.role == "student" %}
+    <h4>Leave Feedback</h4>
+    <form method="post" action="{% url 'course_detail' course.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="action" value="feedback">Submit Feedback</button>
+    </form>
+{% endif %}
+
+<hr>
+
+<!--Enroll if not already enrolled-->
+{% if user.is_authenticated and user.role == 'student' %}
+    <form method="post" action="{% url 'enroll_course' course.id %}">
+        {% csrf_token %}
+        {% if user in course.students.all %}
+            <button type="submit" disabled>You are already enrolled</button>
+        {% else %}
+            <button type="submit">Enroll in this course</button>
+        {% endif %}
+    </form>
+{% endif %}
+
+<!--Link to live course chat-->
+<a href="{% url 'course_chat' course.id %}">Enter Chat</a>
+
+{% endblock %}

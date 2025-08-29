@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!--User Info-->
+<h2>{{ profile_user.real_name }} ({{ profile_user.username }})</h2>
+
+{% if profile_user.photo %}
+    <img src="{{ profile_user.photo.url }}" width="100" height="100" style="border-radius: 50%;">
+{% else %}
+    <img src="{% static 'photo/default.jpg' %}" width="100" height="100" style="border-radius: 50%;">
+{% endif %}
+
+<p>Email: {{ profile_user.email }}</p>
+<p>Role: {{ profile_user.role }}</p>
+
+<hr>
+
+<!--User Courses (Taught/Enrolled)-->
+<h3>Courses</h3>
+{% if courses %}
+    <ul>
+        {% for course in courses %}
+            <li><a href="{% url 'course_detail' course.id %}">{{ course.title }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No courses found.</p>
+{% endif %}
+
+<hr>
+
+<!--User status updates-->
+<h3>Status Updates</h3>
+{% if updates %}
+    <ul style="list-style: none; padding: 0;">
+        {% for update in updates %}
+            <li style="margin-bottom: 1em; border-bottom: 1px solid #ccc; padding-bottom: 0.5em;">
+                <em>{{ update.created_at|date:"M d, Y H:i" }}</em>
+                <div>{{ update.content }}</div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No status updates yet.</p>
+{% endif %}
+
+<!--Teachers can block and unblock students from their profile page-->
+{% if user.role == "teacher" %}
+  {% for course in user.teacher_courses.all %}
+    {% if student in course.blocked_students.all %}
+      <form action="{% url 'unblock_student' student.id course.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Unblock from {{ course.title }}</button>
+      </form>
+    {% elif student in course.students.all %}
+      <form action="{% url 'block_student' student.id course.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Block from {{ course.title }}</button>
+      </form>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% endblock %}
